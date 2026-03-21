@@ -2,12 +2,10 @@ import fastf1
 import pandas as pd
 import os
 
-from ingestion.config import RACES_2024, YEAR, RAW_DIR
-
-fastf1.Cache.enable_cache('cache')
+from ingestion.config import RACES_2024, YEAR, RAW_DIR, RACE_SESSION
 
 def get_lap_times(season: int, race:str) -> pd.DataFrame:
-    session = fastf1.get_session(season,race, 'R')
+    session = fastf1.get_session(season,race, RACE_SESSION)
     session.load(telemetry= False, weather=False)
 
     laps = session.laps[[
