@@ -308,6 +308,246 @@ The `int_driver_era_unified` intermediate model handles the regime join.
 The `mart_historical_champions` model surfaces the unified schema with
 the `data_regime` column exposed as a Looker dimension.
 
+## 006 — Position Fields and DNF Handling
+
+### Problem
+The results dataset contains three position-related fields that are 
+easily confused, and drivers do not complete equal laps due to retirements.
+Using the wrong position field or including DNF laps in pace calculations
+produces misleading analytics.
+
+### Position Fields — What Each Means
+
+**`GridPosition`** — where the driver started the race. Determined by
+qualifying. Used for: positions gained/lost metric.
+
+**`Position`** — where the driver finished on the road. Physical crossing
+order at the chequered flag. Can differ from official result due to
+post-race penalties. Used for: race narrative, lap-by-lap position tracking.
+
+**`ClassifiedPosition`** — the official FIA result after stewards apply
+penalties, time additions, and classification rules. Drivers who retire
+but complete 90%+ of race distance are still classified. This is what
+feeds championship points. Used for: all championship calculations.
+
+### Why Lap Counts Are Unequal Across Drivers
+
+A naive assumption is that all drivers complete the same number of laps.
+In reality:
+- DNF drivers (Accident, Engine, Gearbox etc) stop at their retirement lap
+- Lap 1 incidents can result in 0 or 1 lap rows
+- Classified-but-retired drivers have fewer laps than the race winner
+- Lapped drivers complete the same lap count as the leader — the race
+  ends when the leader crosses the line, everyone stops simultaneously
+
+### Decision
+
+**For championship points:** always use `ClassifiedPosition` — it is the
+official result and the only field that correctly maps to points awarded.
+
+**For race narrative and position tracking:** use `Position` — it reflects
+what physically happened on track including battles and overtakes.
+
+**For positions gained metric:** `GridPosition - ClassifiedPosition` — the
+delta between where a driver started and where they officially finished.
+This is a key column in `mart_driver_season_performance` for separating
+driver skill from car advantage.
+
+**For pace calculations:** exclude DNF laps entirely. A driver who retired
+on lap 5 with a slow out-lap has a misleading average lap time. Filter
+condition in all pace models:
+```sql
+where status = 'Finished'
+or classified_position is not null
+```
+
+**For team pace averages:** weight by laps completed. A teammate who only
+completed 10 laps should not equally influence a team's average pace
+calculation alongside a driver who completed 57 laps.
+
+### Rationale
+Championship analysis built on `Position` instead of `ClassifiedPosition`
+produces incorrect points totals — particularly in seasons with multiple
+post-race penalties (2021, 2023). The positions gained metric using
+`GridPosition` is one of the cleanest signals of driver performance
+independent of car quality — a driver consistently gaining positions from
+mid-grid is demonstrating racecraft regardless of machinery.
+
+DNF lap filtering is a data quality decision, not a business logic decision.
+Unrepresentative laps — retirement laps, lap 1 chaos laps, safety car
+laps — pollute pace models and degrade ML feature quality. Filtering them
+is correct engineering, not cherry-picking.
+
+### dbt Implication
+- `stg_results` exposes all three position fields with clear column
+  descriptions in schema.yml
+- `mart_driver_season_performance` uses `ClassifiedPosition` for points,
+  `Position` for race narrative columns, and derives `positions_gained`
+  as `grid_position - classified_position`
+- All intermediate pace models include a `is_representative_lap` boolean
+  flag — True when the lap is accurate, not a DNF lap, not under safety
+  car, and not lap 1. Downstream models filter on this flag rather than
+  re-implementing the logic independently
+
+  ## 007 — Safety Car and VSC Lap Exclusion + Pit Stop Strategy Impact
+
+### Problem
+Formula 1 races are frequently interrupted by Safety Car (SC) and Virtual
+Safety Car (VSC) periods. Laps completed under these conditions are
+fundamentally different from racing laps and corrupt three analytical
+models if included.
+
+TrackStatus values in FastF1:
+- '1' = green flag, track clear
+- '2' = yellow flag in a sector  
+- '4' = full safety car deployed
+- '5' = virtual safety car (VSC)
+
+### What SC and VSC Do to Lap Data
+
+**Safety Car (4):** A physical safety car leads the field at 80-120 km/h.
+All drivers queue behind it, no overtaking permitted. Lap times inflate
+to roughly 2:10 vs a normal 1:36. The lap time reflects road car pace,
+not race car pace.
+
+**VSC (5):** No physical car. Drivers must hit a minimum delta time on
+their steering wheel display. Less dramatic than SC but still artificially
+slow and not representative of race pace.
+
+### Why SC/VSC Laps Must Be Excluded
+
+**Tire degradation models:** A SC lap puts near-zero stress on tires.
+If included, degradation curves show a false "recovery" mid-stint — the
+tires appear to improve in condition which is physically impossible. The
+recovery is just a rest lap, not real tire regeneration.
+
+**Pace analysis:** Average lap time drops significantly if SC laps are
+included, making drivers appear slower than their actual race pace. A
+driver with two SC laps in a stint looks 3-4 seconds per lap slower on
+average than one with a clean stint.
+
+**Pit stop prediction ML model:** SC laps are the single biggest noise
+source in the feature table. Teams almost always pit under SC because
+it costs minimal time. If the model sees SC laps in training data it
+learns the wrong relationship between tire age and pit decisions — it
+conflates reactive SC pitting with proactive strategic pitting.
+
+### Decision
+Exclude all laps where TrackStatus contains '4' or '5' from pace
+analysis, tire degradation models, and ML feature tables via the
+is_rep_lap flag.
+```python
+~laps['TrackStatus'].astype(str).str.contains('4|5')
+```
+
+`.astype(str)` applied first because FastF1 returns TrackStatus
+inconsistently as string or numeric depending on the session. This
+normalises before the contains check.
+
+### Pit Stop Strategy — SC Pitting as a Separate Category
+
+Safety cars introduce a second problem beyond lap time corruption:
+they fundamentally change pit stop decision-making.
+
+Pitting under SC is strategically "free" — the field bunches up behind
+the safety car so the driver loses minimal time in the pits relative to
+competitors. Teams treat SC periods as reactive opportunistic stops, not
+proactive strategy calls.
+
+**Mixing SC pit stops with proactive pit stops in strategy analysis
+produces meaningless results.** A team that always pits under SC looks
+strategically brilliant — they consistently choose the right tire at the
+right time — but the decision was reactive, not analytical.
+
+### Decision for Pit Stop Strategy Mart
+Add `pitted_under_sc` boolean column to `mart_pit_strategy`:
+```sql
+case
+    when track_status in ('4', '5') then true
+    else false
+end as pitted_under_sc
+```
+
+All undercut/overcut analysis, strategic timing analysis, and pit
+window optimisation filters on `pitted_under_sc = false` — proactive
+stops only. SC stops are tracked separately as a distinct strategic
+category.
+
+### Lap 1 Exclusion (related)
+LapNumber = 1 is excluded from is_rep_lap for similar reasons:
+cold tires, maximum fuel load, dirty track surface, and first corner
+incident risk make Lap 1 times incomparable to any other lap in the
+race.
+
+### dbt Implication
+- `is_rep_lap` flag defined once in `stg_lap_times` — covers SC, VSC,
+  Lap 1, pit laps, deleted laps, and IsAccurate = False
+- `pitted_under_sc` column added to `stg_pit_stops` and surfaced in
+  `mart_pit_strategy`
+- `mart_tire_degradation` filters `is_rep_lap = true` — SC rest laps
+  never appear in degradation curves
+- `mart_ml_features` filters `is_rep_lap = true` — SC laps never
+  corrupt model training features
+
+## 008 — Yellow Flag Laps: Excluded from is_rep_lap or Not?
+
+### Problem
+Yellow flags ('2' in TrackStatus) occur frequently during races — often
+multiple times per race. The question is whether yellow flag laps should
+be excluded from is_rep_lap the same way SC and VSC laps are.
+
+### Key Difference from SC/VSC
+A yellow flag covers one sector only. The driver lifts slightly in that
+sector but the rest of the lap is at full pace. Overall lap time impact
+is roughly 0.3-0.5 seconds — compared to 30+ seconds for a full SC lap.
+
+Excluding yellow flag laps would remove a significant portion of race
+data for a marginal accuracy gain.
+
+### Decision
+Yellow flag laps are NOT excluded from is_rep_lap.
+
+Instead a separate boolean column `has_yellow_flag` is added to
+stg_lap_times. Downstream models and analysts choose whether to filter
+on it depending on the strictness required:
+
+- Strict pace comparison → filter has_yellow_flag = false
+- General analysis → keep yellow flag laps, 0.3s noise is acceptable
+
+### Rationale
+is_rep_lap excludes laps that are fundamentally incomparable to racing
+laps — SC laps, VSC laps, pit laps, Lap 1. A yellow flag lap is still
+a racing lap, just slightly compromised in one sector. Treating it the
+same as a SC lap would be analytically incorrect and would discard too
+much data.
+
+Separating the two gives downstream models the flexibility to be as
+strict or as permissive as the analytical question requires.
+
+### Implementation
+```python
+# is_rep_lap — hard excludes only
+laps['is_rep_lap'] = (
+    (laps['IsAccurate'] == True) &
+    (laps['Deleted'] == False) &
+    (laps['LapNumber'] > 1) &
+    (~laps['TrackStatus'].astype(str).str.contains('4|5')) &
+    (laps['PitInTime'].isna()) &
+    (laps['PitOutTime'].isna())
+)
+
+# Separate soft flag — analyst's choice to filter
+laps['has_yellow_flag'] = (
+    laps['TrackStatus'].astype(str).str.contains('2')
+)
+```
+
+### dbt Implication
+Both columns are surfaced in stg_lap_times. mart_driver_season_performance
+and mart_ml_features use is_rep_lap only. Any model requiring strict
+single-lap pace comparison (e.g. constructor upgrade detection using
+qualifying data) additionally filters has_yellow_flag = false.
+
 ---
 
 *Last updated: March 2026*
