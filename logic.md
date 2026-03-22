@@ -548,6 +548,50 @@ and mart_ml_features use is_rep_lap only. Any model requiring strict
 single-lap pace comparison (e.g. constructor upgrade detection using
 qualifying data) additionally filters has_yellow_flag = false.
 
+
+## 009 — Pit Stop Duration Outlier Filtering
+
+### Problem
+Some pit stop records have unrealistic durations — up to 2393 seconds.
+These occur when a driver retires in the pit lane or has a mechanical
+issue. PitOutTime records when the car eventually left the pit box,
+not when a normal stop completed.
+
+### Why Not Hardcode a Threshold
+A fixed cutoff is arbitrary and fragile — different eras of F1 have
+different average pit stop durations and a 2025 run would need
+different values.
+
+### Why Pure IQR Fails
+Races with very few pit stops (Monaco, Japan, Brazil) have 2-3 data
+points. One extreme outlier makes IQR bounds explode to negative
+thousands and positive thousands — completely meaningless for those
+races.
+
+### Decision
+Combine IQR with physics-based absolute bounds:
+
+- PHYSICAL_MIN = 15 seconds — physically impossible to complete a pit
+  stop including pit lane entry and exit in less than this
+- PHYSICAL_MAX = 300 seconds — no strategic stop takes 5+ minutes
+
+lower_bound = max(PHYSICAL_MIN, Q1 - 1.5 * IQR)
+upper_bound = min(PHYSICAL_MAX, Q3 + 1.5 * IQR)
+
+For normal races: IQR bounds are tighter than physics bounds and
+drive the filter. For low-sample races (Monaco, Japan, Brazil): physics
+bounds act as a safety net preventing nonsensical IQR bounds.
+
+### Rationale
+Two-layer approach — data-driven where sample size allows, physics-
+constrained where it doesn't. Neither purely hardcoded nor purely
+statistical. Adapts to the data while staying grounded in reality.
+
+### dbt Implication
+Filter applied at ingestion in pit_stops.py. stg_pit_stops receives
+only valid strategic stops. Retirement stops captured in stg_results
+via the Status column.
+
 ---
 
 *Last updated: March 2026*
