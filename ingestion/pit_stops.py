@@ -104,7 +104,7 @@ def extract_all_races(season: int = YEAR) -> pd.DataFrame:
             df = get_pit_stops(season, race)
             all_pit_stops.append(df)
         except Exception as e:
-            print(f"  ⚠️  Failed {race}: {type(e).__name__}: {e}")
+            print(f"  Faled {race}: {type(e).__name__}: {e}")
             continue
 
     if not all_pit_stops:
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     df = extract_all_races(YEAR)
     os.makedirs(RAW_DIR, exist_ok=True)
     df.to_csv(f'{RAW_DIR}/pit_stops_{YEAR}.csv', index=False)
-    print(f"\n✅ Pit stops extraction complete — {len(df)} stops across {df['Race'].nunique()} races")
+    print(f"\n Pit stops extraction complete — {len(df)} stops across {df['Race'].nunique()} races")
     print(f"   Avg duration: {df['pit_duration_seconds'].mean():.1f}s")
     print(f"   Fastest stop: {df['pit_duration_seconds'].min():.1f}s")
     print(f"   Slowest stop: {df['pit_duration_seconds'].max():.1f}s")

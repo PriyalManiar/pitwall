@@ -592,6 +592,42 @@ Filter applied at ingestion in pit_stops.py. stg_pit_stops receives
 only valid strategic stops. Retirement stops captured in stg_results
 via the Status column.
 
+## 010 — DNF Classification and Status Field Values
+
+### Problem
+FastF1 session.results Status field uses different values than expected.
+No 'Accident', 'Engine', or 'Collision' values exist — FastF1 simplifies
+to five clean statuses.
+
+### Actual FastF1 Status Values (2024 season)
+- 'Finished'     — completed race on lead lap (287 occurrences)
+- 'Lapped'       — finished race but one or more laps behind leader (138)
+- 'Retired'      — did not finish — mechanical or accident (49)
+- 'Did not start'— DNS, never left the grid (3)
+- 'Disqualified' — completed race but excluded post-race (2)
+
+### Decision
+is_dnf = True when Status is 'Retired' or 'Did not start'
+Finished, Lapped, and Disqualified drivers completed race distance.
+
+dnf_type cannot be determined from FastF1 results alone.
+FastF1 does not distinguish mechanical failures from driver errors.
+Detailed retirement reasons (Engine, Accident, Gearbox etc) come from
+Ergast API — joined in int_driver_era_unified dbt model.
+
+### Rationale
+Lapped drivers are NOT DNFs — they completed the full race distance,
+just slower than the leader. Disqualified drivers also completed race
+distance — their exclusion is a post-race stewards decision, not a
+retirement. Treating either as DNF would incorrectly inflate DNF counts
+and corrupt reliability analysis.
+
+### dbt Implication
+stg_results exposes is_dnf and dnf_type columns.
+int_driver_era_unified joins Ergast retirement reasons to populate
+detailed dnf_type (mechanical vs driver) for post-2003 seasons where
+Ergast has retirement detail.
+
 ---
 
 *Last updated: March 2026*
