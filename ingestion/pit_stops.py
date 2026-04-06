@@ -35,7 +35,7 @@ def get_pit_stops(season: int, race: str) -> pd.DataFrame:
     for col in ['PitInTime', 'PitOutTime']:
         laps[col] = laps[col].dt.total_seconds()
 
-    # ── PitIn side — last lap of each stint ───────────────────────────────────
+    #  PitIn side — last lap of each stint 
     pit_in = laps[laps['PitInTime'].notna()][[
         'Driver', 'DriverNumber', 'Team',
         'Race', 'Year',
@@ -43,7 +43,7 @@ def get_pit_stops(season: int, race: str) -> pd.DataFrame:
         'PitInTime', 'Compound', 'TrackStatus'
     ]].copy()
 
-    # ── PitOut side — first lap of next stint ─────────────────────────────────
+    #  PitOut side — first lap of next stint 
     pit_out = laps[laps['PitOutTime'].notna()][[
         'Driver', 'Race', 'Year',
         'Stint', 'PitOutTime', 'Compound'
@@ -52,7 +52,7 @@ def get_pit_stops(season: int, race: str) -> pd.DataFrame:
     # Rename Compound on pit_out — this is the NEW tire after the stop
     pit_out = pit_out.rename(columns={'Compound': 'CompoundNew'})
 
-    # ── Self join on consecutive stints ───────────────────────────────────────
+    #  Self join on consecutive stints 
     # Stint 1 pit_in joins with Stint 2 pit_out
     # Stint 2 pit_in joins with Stint 3 pit_out
     pit_out['Stint'] = pit_out['Stint'] - 1
@@ -63,13 +63,11 @@ def get_pit_stops(season: int, race: str) -> pd.DataFrame:
         how='inner'
     )
 
-    # ── Derived columns ───────────────────────────────────────────────────────
     pit_stops['pit_duration_seconds'] = (
         pit_stops['PitOutTime'] - pit_stops['PitInTime']
     )
 
     # Was this stop made under safety car or VSC?
-    # See DECISIONS.md #007
     pit_stops['pitted_under_sc'] = (
         pit_stops['TrackStatus'].astype(str).str.contains('4|5')
     )
