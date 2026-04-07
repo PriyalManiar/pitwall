@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_lap_times
+    columns:
+      - name: lap_id
+        tests:
+          - unique
+          - not_null
+      - name: driver_code
+        tests:
+          - not_null
+
+  - name: stg_results
+    columns:
+      - name: result_id
+        tests:
+          - unique
+          - not_null
+      - name: driver_code
+        tests:
+          - not_null
+
+  - name: stg_pit_stops
+    columns:
+      - name: pit_stop_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_weather
+    columns:
+      - name: weather_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_telemetry_raw
+    columns:
+      - name: telemetry_id
+        tests:
+          - not_null

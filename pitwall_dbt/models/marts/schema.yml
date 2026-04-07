@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: mart_driver_season_performance
+    columns:
+      - name: total_points
+        tests:
+          - not_null
+
+  - name: mart_constructor_standings
+    columns:
+      - name: total_points
+        tests:
+          - not_null
+
+  - name: mart_ml_features
+    columns:
+      - name: lap_id
+        tests:
+          - unique
+          - not_null

@@ -639,7 +639,40 @@ Ergast has retirement detail.
 
 014 — run_all.py: Convenience runner for local development and testing outside Airflow.
       Calls the same run() functions the DAG uses — single source of truth, no duplication.
+
+
+## dbt Layer
+
+**Staging:**
+- One model per raw table. Renames columns to snake_case, adds surrogate key via dbt_utils.generate_surrogate_key()
+- Materialized as views — no data duplication, just a clean lens over RAW
+- surrogate key composition: lap_id (driver_number + lap_number + race + year), pit_stop_id (driver_number + race + year + stint), result_id (driver_number + race + year), weather_id (driver + lap_number + race + year), telemetry_id (driver + lap_number + race + year + distance + speed)
+
+**Intermediate:**
+- int_driver_race_performance: joins stg_results + stg_lap_times + stg_pit_stops. Base model for all driver/constructor marts. Uses CASE WHEN to aggregate rep laps only without filtering the full dataset
+- int_pit_strategy_outcomes: self-join on lap_times to get position at pit lap vs 3 laps after. Derives strategy_outcome (undercut_success/overcut_success/neutral)
+- int_weather_pace_impact: window function to calculate dry baseline pace per driver per race. pace_delta_seconds = actual - baseline
+- int_driver_era_unified: stub for FastF1 + Ergast unification. data_regime flag added for Looker filtering
+
+**Marts:**
+- Materialized as tables — pre-computed for Looker query performance
+- mart_ml_features: one row per lap with all ML input variables. Target variable = pitted_this_lap (binary)
+- Race name inconsistency: FastF1 returns shortened country names for lap data (e.g. "Bahrain") but full names for results (e.g. "Bahrain Grand Prix"). Fixed by re-running ingestion — race name is set explicitly from RACES_2024 config, not from FastF1 session metadata
+
+**dbt tests:**
+- unique + not_null on all surrogate keys
+- Telemetry unique test removed — time series table with no natural unique key. Completeness matters, not row uniqueness
+- 225 null lap_time_seconds in stg_lap_times are expected — DNF laps and timing failures
+
+015 — dbt materialization strategy: staging/intermediate as views (no storage cost, always fresh),
+      marts as tables (pre-computed for Looker performance). Views recompute on every query which
+      is fine for transformation layers but too slow for dashboard queries over 26K+ rows.
+
+016 — Race name standardization: FastF1 returns shortened names for lap sessions vs full names
+      for result sessions. Fixed at ingestion layer by explicitly setting Race column from
+      RACES_2024 config. dbt is not the right place to fix source data inconsistencies.
 ---
+
 
 *Last updated: March 2026*
 *Author: Priyal Maniar*

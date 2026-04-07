@@ -4,8 +4,7 @@ with source as (
 
 renamed as (
     select
-        {{ dbt_utils.generate_surrogate_key(['driver', 'lapnumber', 'race', 'year', 'distance']) }} as telemetry_id,
-
+        {{ dbt_utils.generate_surrogate_key(['driver', 'lapnumber', 'race', 'year', 'distance', 'speed']) }} as telemetry_id,
         driver                  as driver_code,
         lapnumber               as lap_number,
         race,
