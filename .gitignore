@@ -1,4 +1,9 @@
+venv/
+venv_dbt/
 cache/
 data/
-venv/
-documents/
+logs/
+target/
+dbt_packages/
+__pycache__/
+.env

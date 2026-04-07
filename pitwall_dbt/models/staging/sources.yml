@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    database: PITWALL
+    schema: RAW
+    tables:
+      - name: lap_times
+      - name: weather
+      - name: pit_stops
+      - name: results
+      - name: telemetry_agg
+      - name: telemetry_raw
