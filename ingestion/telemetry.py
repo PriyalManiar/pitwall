@@ -90,7 +90,7 @@ def extract_all_races(season: int = YEAR) -> tuple[pd.DataFrame, pd.DataFrame]:
     return tel_raw, tel_agg
 
 
-if __name__ == "__main__":
+def run():
     print("Starting telemetry extraction...")
     tel_raw, tel_agg = extract_all_races(YEAR)
 
@@ -103,3 +103,6 @@ if __name__ == "__main__":
     print(f"   Raw rows: {len(tel_raw):,} → telemetry_raw_{YEAR}.csv")
     print(f"   Agg rows: {len(tel_agg):,} → telemetry_agg_{YEAR}.csv")
     print(f"   Races: {tel_agg['Race'].nunique()}")
+
+if __name__ == "__main__":
+    run()

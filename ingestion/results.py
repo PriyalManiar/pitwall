@@ -76,7 +76,7 @@ def extract_all_races(season: int = YEAR) -> pd.DataFrame:
     return pd.concat(all_results, ignore_index=True)
 
 
-if __name__ == "__main__":
+def run():
     print("Starting results extraction...")
     df = extract_all_races(YEAR)
     os.makedirs(RAW_DIR, exist_ok=True)
@@ -86,3 +86,6 @@ if __name__ == "__main__":
     print(f"   Mechanical DNFs: {(df['dnf_type'] == 'mechanical').sum()}")
     print(f"   Driver DNFs: {(df['dnf_type'] == 'driver').sum()}")
     print(f"   Avg positions gained: {df['positions_gained'].mean():.1f}")
+
+if __name__ == "__main__":
+    run()

@@ -43,10 +43,12 @@ def extract_all_races (season: int = YEAR) -> pd.DataFrame:
             continue
     return pd.concat(all_weather, ignore_index=True)
 
-if __name__ == "__main__":
+def run():
     print("Extracting weather data")
     df = extract_all_races(YEAR)
     os.makedirs(RAW_DIR, exist_ok=True)
     df.to_csv(f'{RAW_DIR}/weather_{YEAR}.csv', index=False)
     print(f"Weather extraction complete for {len(df)} laps")
     
+if __name__ == "__main__":
+    run()

@@ -113,7 +113,7 @@ def extract_all_races(season: int = YEAR) -> pd.DataFrame:
     return pd.concat(all_pit_stops, ignore_index=True)
 
 
-if __name__ == "__main__":
+def run():
     print("Starting pit stops extraction...")
     df = extract_all_races(YEAR)
     os.makedirs(RAW_DIR, exist_ok=True)
@@ -123,3 +123,6 @@ if __name__ == "__main__":
     print(f"   Fastest stop: {df['pit_duration_seconds'].min():.1f}s")
     print(f"   Slowest stop: {df['pit_duration_seconds'].max():.1f}s")
     print(f"   SC stops: {df['pitted_under_sc'].sum()} | Clean stops: {(~df['pitted_under_sc']).sum()}")
+
+if __name__ == "__main__":
+    run()

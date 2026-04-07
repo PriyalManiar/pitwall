@@ -628,6 +628,17 @@ int_driver_era_unified joins Ergast retirement reasons to populate
 detailed dnf_type (mechanical vs driver) for post-2003 seasons where
 Ergast has retirement detail.
 
+011 — Docker custom image: Built custom Dockerfile FROM apache/airflow:2.9.0 with fastf1 pre-installed.
+      Avoids ad-hoc runtime pip installs into containers, which are lost on restart and not reproducible.
+
+012 — CeleryExecutor: Chosen over SequentialExecutor for production realism. Redis as broker enables
+      parallel task execution across workers. Demonstrates understanding of distributed task queues.
+
+013 — schedule=None: Pipeline triggers manually or via external trigger. F1 data ingestion is
+      event-driven (race weekends), not time-driven. A cron schedule would be semantically incorrect.
+
+014 — run_all.py: Convenience runner for local development and testing outside Airflow.
+      Calls the same run() functions the DAG uses — single source of truth, no duplication.
 ---
 
 *Last updated: March 2026*
