@@ -138,3 +138,157 @@
 [2026-04-07T00:09:24.924+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:09:24.923+0000] {dag.py:3096} INFO - Sync 1 DAGs
 [2026-04-07T00:09:24.927+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:09:24.927+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
 [2026-04-07T00:09:24.932+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.336 seconds
+[2026-04-07T00:09:55.223+0000] {processor.py:161} INFO - Started process (PID=85) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:09:55.226+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:09:55.228+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:09:55.227+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:09:55.675+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:09:55.686+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:09:55.686+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:09:55.693+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:09:55.693+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:09:55.699+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.483 seconds
+[2026-04-07T00:10:26.080+0000] {processor.py:161} INFO - Started process (PID=87) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:26.081+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:10:26.085+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:26.084+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:26.456+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:26.470+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:26.469+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:10:26.474+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:26.474+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:10:26.480+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.408 seconds
+[2026-04-07T00:10:56.741+0000] {processor.py:161} INFO - Started process (PID=89) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:56.742+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:10:56.744+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:56.744+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:56.989+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:10:56.998+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:56.997+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:10:57.001+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:10:57.001+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:10:57.006+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.270 seconds
+[2026-04-07T00:11:27.240+0000] {processor.py:161} INFO - Started process (PID=91) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:27.241+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:11:27.242+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:27.242+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:27.488+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:27.503+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:27.503+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:11:27.511+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:27.511+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:11:27.524+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.288 seconds
+[2026-04-07T00:11:57.789+0000] {processor.py:161} INFO - Started process (PID=93) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:57.790+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:11:57.792+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:57.792+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:58.029+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:11:58.036+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:58.036+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:11:58.040+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:11:58.040+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:11:58.044+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.261 seconds
+[2026-04-07T00:12:28.290+0000] {processor.py:161} INFO - Started process (PID=95) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:28.291+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:12:28.292+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:28.292+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:28.552+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:28.560+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:28.560+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:12:28.563+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:28.563+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:12:28.569+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.282 seconds
+[2026-04-07T00:12:58.797+0000] {processor.py:161} INFO - Started process (PID=97) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:58.798+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:12:58.799+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:58.799+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:59.041+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:12:59.049+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:59.049+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:12:59.053+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:12:59.052+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:12:59.057+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.267 seconds
+[2026-04-07T00:13:29.297+0000] {processor.py:161} INFO - Started process (PID=99) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:13:29.298+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:13:29.300+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:13:29.300+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:13:29.544+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:13:29.552+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:13:29.552+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:13:29.556+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:13:29.556+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:13:29.561+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.269 seconds
+[2026-04-07T00:13:59.785+0000] {processor.py:161} INFO - Started process (PID=101) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:13:59.786+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:13:59.787+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:13:59.787+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:14:00.021+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:14:00.030+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:14:00.030+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:14:00.033+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:14:00.033+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:14:00.038+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.259 seconds
+[2026-04-07T00:14:30.061+0000] {processor.py:161} INFO - Started process (PID=103) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:14:30.062+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:14:30.063+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:14:30.063+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:14:30.292+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:14:30.299+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:14:30.299+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:14:30.302+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:14:30.302+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:14:30.308+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.251 seconds
+[2026-04-07T00:15:00.557+0000] {processor.py:161} INFO - Started process (PID=105) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:00.558+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:15:00.561+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:00.561+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:00.922+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:00.931+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:00.931+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:15:00.935+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:00.935+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:15:00.940+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.386 seconds
+[2026-04-07T00:15:31.218+0000] {processor.py:161} INFO - Started process (PID=107) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:31.219+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:15:31.221+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:31.220+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:31.473+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:15:31.480+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:31.480+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:15:31.484+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:15:31.484+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:15:31.489+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.277 seconds
+[2026-04-07T00:16:01.734+0000] {processor.py:161} INFO - Started process (PID=109) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:01.735+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:16:01.736+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:01.736+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:02.003+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:02.016+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:02.016+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:16:02.020+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:02.020+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:16:02.026+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.295 seconds
+[2026-04-07T00:16:32.297+0000] {processor.py:161} INFO - Started process (PID=111) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:32.298+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:16:32.299+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:32.299+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:32.544+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:16:32.555+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:32.555+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:16:32.560+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:16:32.560+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:16:32.565+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.273 seconds
+[2026-04-07T00:17:02.796+0000] {processor.py:161} INFO - Started process (PID=113) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:02.797+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:17:02.798+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:02.798+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:03.039+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:03.047+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:03.046+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:17:03.050+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:03.050+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:17:03.054+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.264 seconds
+[2026-04-07T00:17:33.268+0000] {processor.py:161} INFO - Started process (PID=115) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:33.269+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:17:33.270+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:33.270+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:33.498+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:17:33.507+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:33.507+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:17:33.511+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:17:33.511+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:17:33.518+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.254 seconds
+[2026-04-07T00:18:03.544+0000] {processor.py:161} INFO - Started process (PID=117) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:03.546+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:18:03.547+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:03.547+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:03.783+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:03.791+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:03.791+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:18:03.794+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:03.794+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:18:03.799+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.262 seconds
+[2026-04-07T00:18:34.033+0000] {processor.py:161} INFO - Started process (PID=119) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:34.034+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:18:34.035+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:34.035+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:34.315+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:18:34.324+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:34.324+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:18:34.328+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:18:34.328+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:18:34.335+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.306 seconds
+[2026-04-07T00:19:04.543+0000] {processor.py:161} INFO - Started process (PID=121) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:04.544+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:19:04.546+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:04.546+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:04.835+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:04.846+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:04.846+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:19:04.850+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:04.850+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:19:04.857+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.320 seconds
+[2026-04-07T00:19:35.150+0000] {processor.py:161} INFO - Started process (PID=123) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:35.151+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:19:35.153+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:35.153+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:35.388+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:19:35.396+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:35.396+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:19:35.400+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:19:35.400+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:19:35.405+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.261 seconds
+[2026-04-07T00:20:05.631+0000] {processor.py:161} INFO - Started process (PID=125) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:05.632+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:20:05.634+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:05.634+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:05.889+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:05.898+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:05.898+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:20:05.902+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:05.902+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:20:05.908+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.281 seconds
+[2026-04-07T00:20:36.150+0000] {processor.py:161} INFO - Started process (PID=127) to work on /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:36.151+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/pitwall_dag.py for tasks to queue
+[2026-04-07T00:20:36.153+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:36.152+0000] {dagbag.py:540} INFO - Filling up the DagBag from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:36.386+0000] {processor.py:840} INFO - DAG(s) 'pitwall_ingestion' retrieved from /opt/airflow/dags/pitwall_dag.py
+[2026-04-07T00:20:36.395+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:36.395+0000] {dag.py:3096} INFO - Sync 1 DAGs
+[2026-04-07T00:20:36.398+0000] {logging_mixin.py:188} INFO - [2026-04-07T00:20:36.398+0000] {dag.py:3954} INFO - Setting next_dagrun for pitwall_ingestion to None, run_after=None
+[2026-04-07T00:20:36.403+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/pitwall_dag.py took 0.261 seconds
