@@ -1677,3 +1677,5 @@ File Path                         PID    Runtime      # DAGs    # Errors  Last R
 --------------------------------  -----  ---------  --------  ----------  --------------  -------------------
 /opt/airflow/dags/pitwall_dag.py                           1           0  0.37s           2026-04-07T01:34:10
 ================================================================================
+[2026-04-07T01:34:32.490+0000] {manager.py:737} INFO - Searching for files in /opt/airflow/dags
+[2026-04-07T01:34:32.494+0000] {manager.py:740} INFO - There are 1 files in /opt/airflow/dags
