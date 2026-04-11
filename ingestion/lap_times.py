@@ -2,63 +2,61 @@ import fastf1
 import pandas as pd
 import os
 
-from ingestion.config import RACES_2024, YEAR, RAW_DIR, RACE_SESSION
+from ingestion.config import YEARS, RAW_DIR, RACE_SESSION, get_race_names
 
-def get_lap_times(season: int, race:str) -> pd.DataFrame:
-    session = fastf1.get_session(season,race, RACE_SESSION)
-    session.load(telemetry= False, weather=False)
+def get_lap_times(season: int, race: str) -> pd.DataFrame:
+    session = fastf1.get_session(season, race, RACE_SESSION)
+    session.load(telemetry=False, weather=False)
 
     laps = session.laps[[
-        'Driver','DriverNumber','Team','LapNumber','LapTime',
-        'Sector1Time','Sector2Time','Sector3Time',
-        'Compound','Stint', 'TyreLife','FreshTyre','Position',
-        'PitInTime','PitOutTime','IsAccurate','Deleted','TrackStatus'
+        'Driver', 'DriverNumber', 'Team', 'LapNumber', 'LapTime',
+        'Sector1Time', 'Sector2Time', 'Sector3Time',
+        'Compound', 'Stint', 'TyreLife', 'FreshTyre', 'Position',
+        'PitInTime', 'PitOutTime', 'IsAccurate', 'Deleted', 'TrackStatus'
     ]].copy()
 
     laps['Race'] = race
     laps['Year'] = season
 
-    #Convert timedelta columns to float seconds for Snowflake
-    for col in ['LapTime','Sector1Time','Sector2Time','Sector3Time', 'PitInTime','PitOutTime']:
+    for col in ['LapTime', 'Sector1Time', 'Sector2Time', 'Sector3Time', 'PitInTime', 'PitOutTime']:
         laps[col] = laps[col].dt.total_seconds()
 
-    #Add is_rep_lap - source of truth for data quality
-    #All models that need clean laps filter from this column
     laps['is_rep_lap'] = (
-        (laps['IsAccurate']  == True) &
+        (laps['IsAccurate'] == True) &
         (laps['Deleted'] == False) &
-        (laps['LapNumber'] > 1) & #lap 1 excluded as different from other laps 
-        (~laps['TrackStatus'].astype(str).str.contains('4|5')) & #exclude laps with 4: saftey car or 5: virtual safety car (VSC)
+        (laps['LapNumber'] > 1) &
+        (~laps['TrackStatus'].astype(str).str.contains('4|5')) &
         (laps['PitInTime'].isna()) &
         (laps['PitOutTime'].isna())
     )
 
-    # Separate TrackStatus for yellow flag cases
     laps['has_yellow_flag'] = (
         laps['TrackStatus'].astype(str).str.contains('2')
     )
     return laps
 
-def extract_all_races(season: int = YEAR) -> pd.DataFrame:
+def extract_all_races(years: list = YEARS) -> pd.DataFrame:
     all_laps = []
 
-    for race in RACES_2024:
-        print(f"Extracting {race}")
-        try:
-            laps = get_lap_times(season, race)
-            all_laps.append(laps)
-        except Exception as e:
-            print(f"Error extracting {race}: {e}")      
-            continue
+    for season in years:
+        races = get_race_names(season)
+        for race in races:
+            print(f"Extracting lap times: {season} {race}")
+            try:
+                laps = get_lap_times(season, race)
+                all_laps.append(laps)
+            except Exception as e:
+                print(f"Error extracting {season} {race}: {e}")
+                continue
+
     return pd.concat(all_laps, ignore_index=True)
-   
+
 def run():
     print("Extracting lap times")
-    df = extract_all_races(YEAR) 
-    os.makedirs(RAW_DIR, exist_ok=True)  
-    df.to_csv(f'{RAW_DIR}/lap_times_{YEAR}.csv', index=False)
+    df = extract_all_races(YEARS)
+    os.makedirs(RAW_DIR, exist_ok=True)
+    df.to_csv(f'{RAW_DIR}/lap_times_2023_2025.csv', index=False)
     print(f"Lap times extraction complete for {len(df)} laps")
 
 if __name__ == "__main__":
     run()
-    

@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
-from ingestion import lap_times, weather, pit_stops, results, telemetry
+from ingestion import lap_times, weather, pit_stops, results, telemetry, f1db
 
 with DAG(
     dag_id='pitwall_ingestion',
@@ -15,6 +15,11 @@ with DAG(
 
     start = EmptyOperator(task_id='start')
 
+    t_f1db = PythonOperator(
+        task_id='ingest_f1db',
+        python_callable=f1db.run,
+    )
+    
     t_lap_times = PythonOperator(
         task_id='ingest_lap_times',
         python_callable=lap_times.run,
@@ -42,4 +47,4 @@ with DAG(
 
     done = EmptyOperator(task_id='done')
 
-    start >> [t_lap_times, t_weather, t_pit_stops, t_results, t_telemetry] >> done
+    start >> t_f1db >> t_lap_times >> t_weather >> t_pit_stops >> t_results >> t_telemetry >> done
