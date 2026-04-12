@@ -1,36 +1,43 @@
 import snowflake.connector
 import getpass
+import os
 
-user = input("Snowflake username (email): ")
-password = getpass.getpass("Snowflake password: ")
-account = input("Account identifier: ")
-
-conn = snowflake.connector.connect(
-    user=user,
-    password=password,
-    account=account,
-    warehouse='PITWALL_WH',
-    database='PITWALL',
-    schema='RAW'
-)
-
-cursor = conn.cursor()
-
-print("Uploading file to stage... (this may take a few minutes for 9M rows)")
-cursor.execute("PUT file:///Users/priyal/Desktop/projects/pitwall/data/raw/telemetry_raw_2024.csv @~ AUTO_COMPRESS=TRUE")
-
-print("Loading into table...")
-cursor.execute("""
-    COPY INTO PITWALL.RAW.TELEMETRY_RAW
-    FROM @~/telemetry_raw_2024.csv.gz
-    FILE_FORMAT = (
-        TYPE = 'CSV'
-        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
-        SKIP_HEADER = 1
-        NULL_IF = ('', 'None', 'NaN')
+def get_connection():
+    user = input("Snowflake username: ")
+    password = getpass.getpass("Snowflake password: ")
+    return snowflake.connector.connect(
+        user=user,
+        password=password,
+        account='AIZZHNC-TT89572',
+        warehouse='PITWALL_WH',
+        database='PITWALL',
+        schema='RAW'
     )
-""")
 
-print(cursor.fetchall())
-cursor.close()
-conn.close()
+def run():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    parquet_path = '/Users/priyal/Desktop/projects/pitwall/data/raw/telemetry_raw_2023_2025.parquet'
+
+    print("Uploading parquet to stage...")
+    cursor.execute(f"PUT file://{parquet_path} @~ AUTO_COMPRESS=FALSE OVERWRITE=TRUE")
+
+    print("Loading into TELEMETRY_RAW...")
+    cursor.execute("TRUNCATE TABLE PITWALL.RAW.TELEMETRY_RAW")
+    cursor.execute("""
+        COPY INTO PITWALL.RAW.TELEMETRY_RAW
+        FROM @~/telemetry_raw_2023_2025.parquet
+        FILE_FORMAT = (TYPE = 'PARQUET')
+        MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+    """)
+
+    result = cursor.fetchall()
+    print(result)
+
+    cursor.close()
+    conn.close()
+    print("Done.")
+
+if __name__ == "__main__":
+    run()

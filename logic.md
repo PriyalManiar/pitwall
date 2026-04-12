@@ -671,6 +671,75 @@ Ergast has retirement detail.
 016 — Race name standardization: FastF1 returns shortened names for lap sessions vs full names
       for result sessions. Fixed at ingestion layer by explicitly setting Race column from
       RACES_2024 config. dbt is not the right place to fix source data inconsistencies.
+
+018 — Telemetry storage: Raw telemetry (27.2M rows) stored as Parquet instead of CSV.
+      Parquet is columnar, compressed, and natively supported by Snowflake COPY INTO.
+      5-10x smaller than CSV for the same data. MATCH_BY_COLUMN_NAME handles schema
+      mapping automatically. CSV would have required manual column ordering.
+
+019 — Telemetry extraction strategy: Agg telemetry extracted locally (fast, cached).
+      Raw telemetry extracted on Google Colab (3 parallel notebooks, one per year,
+      separate IPs = separate rate limits). Avoids FastF1 500 calls/hour limit.
+      Raw telemetry not cached locally — too large for Mac storage.
+
+020 — ML train/test split by year: Train on 2023-2024, test on 2025. Random split
+      would leak same-race laps into both sets — a driver's lap 30 in train and lap
+      31 in test from the same race is data leakage. Year-based split simulates real
+      production deployment: model trained on history, evaluated on unseen future races.
+
+021 — Pit stop model threshold: Default 0.5 maximizes F1 (0.214). Threshold 0.1
+      maximizes recall (0.572) at cost of precision. For live race strategy use case,
+      lower threshold preferred — missing a pit window costs positions, false alarms
+      are cheap. Kafka consumer uses threshold=0.2 for real-time inference.
+
+022 — Feature engineering in dbt not Python: gap_to_car_ahead, laps_remaining,
+      lap_time_delta_3 derived in mart_ml_features.sql. Features available to any
+      downstream model or dashboard, documented, tested, version controlled. ML script
+      only pulls features — does not engineer them.
+
+023 — dbt tests scope: unique + not_null on surrogate keys. Telemetry unique test
+      removed — time series table with no natural unique key, completeness matters
+      not row uniqueness. lap_time_seconds not_null removed — DNF laps and timing
+      failures produce legitimate nulls. Tests should catch bugs, not flag expected
+      data characteristics.
+
+024 — Lap time predictor results: RMSE=2.079s, R²=0.961 on 2025 test set. Model explains
+      96.1% of lap time variance using telemetry + weather + tyre features. Max error of
+      50.659s attributed to SC/VSC laps slipping through is_rep_lap filter — data quality
+      edge case, not model failure. XGBoost outperformed RandomForest and LinearRegression.
+
+025 — Pit stop predictor results: F1=0.213, Precision=0.153, Recall=0.347 on 2025 test set.
+      Low precision expected — pit strategy depends on gap to car ahead, competitor tyre age,
+      safety car probability — information not fully captured in telemetry. Threshold=0.2
+      used for Kafka live inference (recall=0.482) — missing a pit window costs positions,
+      false alarms are cheap. XGBoost selected via cross-validation over LogisticRegression
+      and RandomForest.
+
+026 — SHAP values: TreeExplainer used for XGBoost and RandomForest models. Summary plots
+      saved to ml/plots/. SHAP computed on first 500 test rows for performance. Explains
+      individual prediction contributions — interview-ready explanation of model decisions.
+
+027 — Optuna hyperparameter tuning: 50 trials per model using Bayesian optimization.
+      Smarter than GridSearchCV which tries all combinations exhaustively. Improved pit
+      stop F1 from 0.142 to 0.151 on training set. Direction=maximize for F1 (classification)
+      and maximize for neg_MSE (regression).
+
+028 — f1db as Ergast replacement: Ergast API sunset in 2024, Jolpica replacement blocked
+      by network. f1db GitHub releases provide same data as CSV — downloaded via curl,
+      no API key required. Filtered to pre-2023 (year < 2023) to avoid overlap with
+      FastF1 2023-2025 data. 25,892 rows covering 1950-2022, 73 seasons.
+
+029 — Data coverage strategy: f1db 1950-2022 for historical champions dashboard.
+      FastF1 2023-2025 for ML training (same regulation era, consistent patterns).
+      Kafka/OpenF1 2026 for live inference. Gap years avoided by design — 2022 was
+      new regulation era, mixing pre/post 2022 data would introduce noise.
+
+030 — Telemetry raw extraction via Colab: 3 parallel Colab notebooks (one per year),
+      each with separate IP = separate 500 calls/hour rate limit. Cache stored in
+      Google Drive per notebook. 27.2M rows across 70 races extracted successfully.
+      2023 Emilia Romagna missing — race was cancelled due to flooding, not a data error.
+
+
 ---
 
 
