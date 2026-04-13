@@ -19,7 +19,7 @@ def fetch_laps(session_key, driver_number):
     url = f"https://api.openf1.org/v1/laps?session_key={session_key}&driver_number={driver_number}"
     response = requests.get(url)
     laps = response.json()
-    if not laps:
+    if not laps or not isinstance(laps, list):
         print(f"  No data for driver {driver_number}, skipping")
         return []
     filtered = []

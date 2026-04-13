@@ -1,6 +1,6 @@
 import requests
 import numpy as np
-from collections import defaultdict
+import time
 
 def fetch_json(url):
     response = requests.get(url)
@@ -13,33 +13,39 @@ def build_feature_store(session_key, drivers):
     print("Building feature store...")
     store = {}
 
-    # fetch stints for all drivers
     print("  Fetching stints...")
     stints = {}
     for driver in drivers:
         data = fetch_json(f"https://api.openf1.org/v1/stints?session_key={session_key}&driver_number={driver}")
         stints[driver] = data
+        time.sleep(2)
 
-    # fetch position for all drivers
     print("  Fetching positions...")
     positions = {}
     for driver in drivers:
         data = fetch_json(f"https://api.openf1.org/v1/position?session_key={session_key}&driver_number={driver}")
         positions[driver] = sorted(data, key=lambda x: x["date"])
+        time.sleep(2)
 
-    # fetch weather (same for all drivers)
+    print("  Fetching intervals...")
+    intervals = {}
+    for driver in drivers:
+        data = fetch_json(f"https://api.openf1.org/v1/intervals?session_key={session_key}&driver_number={driver}")
+        intervals[driver] = sorted(data, key=lambda x: x["date"])
+        time.sleep(2)
+
     print("  Fetching weather...")
     weather = fetch_json(f"https://api.openf1.org/v1/weather?session_key={session_key}")
     weather = sorted(weather, key=lambda x: x["date"])
 
-    # fetch car data for all drivers
     print("  Fetching car data...")
     car_data = {}
     for driver in drivers:
         data = fetch_json(f"https://api.openf1.org/v1/car_data?session_key={session_key}&driver_number={driver}")
         car_data[driver] = sorted(data, key=lambda x: x["date"])
+        print(f"    Car data driver {driver}: {len(car_data[driver])} points")
+        time.sleep(2)
 
-    # fetch laps to get date_start per lap
     print("  Fetching lap timestamps...")
     lap_times = {}
     for driver in drivers:
@@ -50,9 +56,9 @@ def build_feature_store(session_key, drivers):
                 "lap_duration": lap.get("lap_duration"),
                 "total_laps": None
             }
-
+        time.sleep(2)
     print(f"  Lap timestamps fetched: {len(lap_times)} entries")
-    # compute total laps per driver
+
     for driver in drivers:
         driver_laps = [k[1] for k in lap_times if k[0] == driver]
         max_lap = max(driver_laps) if driver_laps else 0
@@ -68,7 +74,6 @@ def build_feature_store(session_key, drivers):
         if not date_start:
             continue
 
-        # stint features
         stint_number = 1
         compound = "MEDIUM"
         tyre_life = 1
@@ -79,7 +84,6 @@ def build_feature_store(session_key, drivers):
                 tyre_life = lap_number - stint["lap_start"] + 1
                 break
 
-        # position — most recent before lap start
         position = 10
         for pos in positions.get(driver, []):
             if pos["date"] <= date_start:
@@ -87,7 +91,6 @@ def build_feature_store(session_key, drivers):
             else:
                 break
 
-        # weather — most recent before lap start
         track_temp = 40.0
         air_temp = 20.0
         is_raining = 0
@@ -99,7 +102,13 @@ def build_feature_store(session_key, drivers):
             else:
                 break
 
-        # car data — points within this lap window
+        gap = 0.0
+        for iv in intervals.get(driver, []):
+            if iv["date"] <= date_start:
+                gap = iv.get("interval", 0.0) or 0.0
+            else:
+                break
+
         next_lap_key = (driver, lap_number + 1)
         date_end = lap_times.get(next_lap_key, {}).get("date_start", None)
         lap_car_data = [
@@ -115,7 +124,6 @@ def build_feature_store(session_key, drivers):
             avg_throttle = 50.0
             heavy_braking = 0.1
 
-        # laps remaining
         total_laps = lap_info["total_laps"] or lap_number
         laps_remaining = max(0, total_laps - lap_number)
 
@@ -132,7 +140,7 @@ def build_feature_store(session_key, drivers):
             "avg_throttle_pct": avg_throttle,
             "heavy_braking_pct": heavy_braking,
             "laps_remaining": laps_remaining,
-            "gap_to_car_ahead_seconds": 0.0
+            "gap_to_car_ahead_seconds": gap
         }
 
     print(f"Feature store built: {len(store)} entries\n")
