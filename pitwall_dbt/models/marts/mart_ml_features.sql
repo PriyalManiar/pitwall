@@ -36,7 +36,6 @@ pit_flags as (
     from pit_stops
 ),
 
--- Total laps per race for laps_remaining calculation
 race_laps as (
     select
         race,
@@ -44,6 +43,37 @@ race_laps as (
         max(lap_number)                     as total_laps
     from laps
     group by 1, 2
+),
+
+-- Step 1: calculate gap to car ahead per lap per driver
+gap_per_lap as (
+    select
+        driver_code,
+        race,
+        year,
+        lap_number,
+        lap_time_seconds - lag(lap_time_seconds)
+            over (
+                partition by race, year, lap_number
+                order by position
+            )                               as gap_to_car_ahead_seconds
+    from laps
+),
+
+-- Step 2: lag gap by 1 lap to avoid leakage
+-- Uses previous lap's gap as predictor, not current lap's gap
+gap_lagged as (
+    select
+        driver_code,
+        race,
+        year,
+        lap_number,
+        lag(gap_to_car_ahead_seconds)
+            over (
+                partition by driver_code, race, year
+                order by lap_number
+            )                               as gap_prev_lap_seconds
+    from gap_per_lap
 ),
 
 enriched as (
@@ -67,17 +97,13 @@ enriched as (
         l.lap_time_seconds,
         l.is_rep_lap,
 
-        -- Laps remaining — proxy for pit window urgency
-        rl.total_laps - l.lap_number       as laps_remaining,
+        -- Laps remaining
+        rl.total_laps - l.lap_number        as laps_remaining,
 
-        -- Gap to car ahead — key strategic signal
-        l.lap_time_seconds - lag(l.lap_time_seconds)
-            over (
-                partition by l.race, l.year, l.lap_number
-                order by l.position
-            )                               as gap_to_car_ahead_seconds,
+        -- Gap to car ahead from PREVIOUS lap (no leakage)
+        g.gap_prev_lap_seconds              as gap_to_car_ahead_seconds,
 
-        -- Pace degradation — lap time delta vs 3 laps ago
+        -- Pace degradation vs 3 laps ago
         l.lap_time_seconds - lag(l.lap_time_seconds, 3)
             over (
                 partition by l.driver_code, l.race, l.year
@@ -118,6 +144,11 @@ enriched as (
     left join race_laps rl
         on l.race = rl.race
         and l.year = rl.year
+    left join gap_lagged g
+        on l.driver_code = g.driver_code
+        and l.lap_number = g.lap_number
+        and l.race = g.race
+        and l.year = g.year
 )
 
 select * from enriched

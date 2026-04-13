@@ -26,14 +26,19 @@ ENCODER_PATH = 'ml/lap_time_compound_encoder.pkl'
 PLOTS_DIR = 'ml/plots'
 
 def get_snowflake_connection():
-    user = input("Snowflake username: ")
-    password = getpass.getpass("Snowflake password: ")
+    print("\nSnowflake Connection")
+    user = input("Username: ")
+    password = getpass.getpass("Password: ")
+    account = input("Account identifier: ")
+    warehouse = input("Warehouse (default: PITWALL_WH): ") or 'PITWALL_WH'
+    database = input("Database (default: PITWALL): ") or 'PITWALL'
+    
     return snowflake.connector.connect(
         user=user,
         password=password,
-        account='AIZZHNC-TT89572',
-        warehouse='PITWALL_WH',
-        database='PITWALL',
+        account=account,
+        warehouse=warehouse,
+        database=database,
         schema='MARTS'
     )
 
@@ -44,9 +49,8 @@ def load_features(conn) -> pd.DataFrame:
             lap_time_seconds, tyre_life, compound, stint,
             lap_number, position, track_temp_c, air_temp_c,
             is_raining, avg_speed, avg_throttle_pct,
-            heavy_braking_pct, year,
-            laps_remaining, gap_to_car_ahead_seconds,
-            lap_time_delta_3_seconds
+            heavy_braking_pct, year, race, driver_code,
+            laps_remaining, gap_to_car_ahead_seconds
         FROM PITWALL.MARTS.MART_ML_FEATURES
         WHERE is_rep_lap = TRUE
           AND lap_time_seconds IS NOT NULL
@@ -66,8 +70,7 @@ def prepare_features(df: pd.DataFrame):
         'tyre_life', 'compound_encoded', 'stint', 'lap_number',
         'position', 'track_temp_c', 'air_temp_c', 'is_raining',
         'avg_speed', 'avg_throttle_pct', 'heavy_braking_pct',
-        'laps_remaining', 'gap_to_car_ahead_seconds',
-        'lap_time_delta_3_seconds'
+        'laps_remaining', 'gap_to_car_ahead_seconds'
     ]
 
     X = df[feature_cols].fillna(0)
@@ -133,9 +136,10 @@ def tune_with_optuna(X_train, y_train, best_name) -> dict:
         if best_name == 'RandomForest':
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 300),
-                'max_depth': trial.suggest_int('max_depth', 3, 15),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
                 'min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
                 'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10),
+                'max_features': trial.suggest_float('max_features', 0.3, 0.8),
                 'random_state': 42,
                 'n_jobs': -1
             }
@@ -144,7 +148,7 @@ def tune_with_optuna(X_train, y_train, best_name) -> dict:
         elif best_name == 'XGBoost':
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 300),
-                'max_depth': trial.suggest_int('max_depth', 3, 10),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
                 'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
                 'subsample': trial.suggest_float('subsample', 0.6, 1.0),
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
@@ -272,7 +276,9 @@ def write_predictions(conn, df, X, best_model):
             track_temp_c                FLOAT,
             is_raining                  BOOLEAN,
             avg_speed                   FLOAT,
-            year                        NUMBER
+            year                        NUMBER,
+            race                        VARCHAR,
+            driver_code                 VARCHAR
         )
     """)
     cursor.execute("TRUNCATE TABLE PITWALL.MARTS.MART_LAP_PREDICTIONS")
@@ -280,11 +286,12 @@ def write_predictions(conn, df, X, best_model):
     rows = df[[
         'lap_time_seconds', 'predicted_lap_time_seconds',
         'prediction_error_seconds', 'tyre_life', 'compound',
-        'lap_number', 'track_temp_c', 'is_raining', 'avg_speed', 'year'
+        'lap_number', 'track_temp_c', 'is_raining', 'avg_speed',
+        'year', 'race', 'driver_code'
     ]].values.tolist()
 
     cursor.executemany(
-        "INSERT INTO PITWALL.MARTS.MART_LAP_PREDICTIONS VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        "INSERT INTO PITWALL.MARTS.MART_LAP_PREDICTIONS VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
         rows
     )
     print(f"Written {len(rows)} predictions to Snowflake")

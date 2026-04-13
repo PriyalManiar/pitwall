@@ -739,6 +739,29 @@ Ergast has retirement detail.
       Google Drive per notebook. 27.2M rows across 70 races extracted successfully.
       2023 Emilia Romagna missing — race was cancelled due to flooding, not a data error.
 
+031 — Lap time predictor overfitting fix: lap_time_delta_3_seconds removed from
+      lap time predictor features — it's derived from the target variable (lap_time_seconds)
+      creating target leakage. Model learns to predict current lap time from recent lap times
+      rather than from causal features. Removed from lap time model only — retained in pit
+      stop model where target is pitted_this_lap (different variable, no leakage).
+
+032 — Lap time predictor error analysis: RMSE of 5.3s is misleading due to 42 extreme
+      outlier rows (0.06% of data). Error distribution: 61.5% within 2s, 86.3% within 5s,
+      99.94% within 20s. Outliers are likely VSC/SC laps not caught by is_rep_lap filter
+      or telemetry sensor anomalies. Median error is more representative metric than RMSE
+      for this dataset. RMSE penalizes large errors quadratically — one 30s error contributes
+      as much as 225 one-second errors.
+
+033 — Lap time predictor improvement: First run achieved RMSE=2.079s, R²=0.961 before
+      weather join fix. After fixing driver_code join in mart_ml_features (was joining on
+      driver_number = driver_code which is wrong), weather data fully populated. Model
+      performance changed due to different data distribution — trade-off between data
+      quality and model performance accepted. Final model: RMSE=5.3s, R²=0.741, but
+      86.3% of predictions within 5s which is operationally acceptable for strategy use.
+
+034 — race and driver_code added to MART_LAP_PREDICTIONS: Required for error analysis
+      by circuit and driver. Enables Looker to slice prediction errors by race/driver.
+      Not added to MART_PIT_PREDICTIONS initially — will be added if needed for dashboards.
 
 ---
 

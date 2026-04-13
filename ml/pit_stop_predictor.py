@@ -29,14 +29,19 @@ ENCODER_PATH = 'ml/compound_encoder.pkl'
 PLOTS_DIR = 'ml/plots'
 
 def get_snowflake_connection():
-    user = input("Snowflake username: ")
-    password = getpass.getpass("Snowflake password: ")
+    print("\nSnowflake Connection")
+    user = input("Username: ")
+    password = getpass.getpass("Password: ")
+    account = input("Account identifier : ")
+    warehouse = input("Warehouse (default: PITWALL_WH): ") or 'PITWALL_WH'
+    database = input("Database (default: PITWALL): ") or 'PITWALL'
+    
     return snowflake.connector.connect(
         user=user,
         password=password,
-        account='AIZZHNC-TT89572',
-        warehouse='PITWALL_WH',
-        database='PITWALL',
+        account=account,
+        warehouse=warehouse,
+        database=database,
         schema='MARTS'
     )
 
@@ -47,7 +52,8 @@ def load_features(conn) -> pd.DataFrame:
             tyre_life, compound, position, lap_number,
             stint, track_temp_c, air_temp_c, is_raining,
             avg_speed, avg_throttle_pct, heavy_braking_pct,
-            pitted_this_lap, year
+            pitted_this_lap, year,
+            laps_remaining, gap_to_car_ahead_seconds
         FROM PITWALL.MARTS.MART_ML_FEATURES
         WHERE tyre_life IS NOT NULL
           AND position IS NOT NULL
@@ -56,7 +62,6 @@ def load_features(conn) -> pd.DataFrame:
     df.columns = df.columns.str.lower()
     print(f"Loaded {len(df)} rows")
     return df
-    
 
 def prepare_features(df: pd.DataFrame):
     le = LabelEncoder()
@@ -65,7 +70,8 @@ def prepare_features(df: pd.DataFrame):
     feature_cols = [
         'tyre_life', 'compound_encoded', 'position', 'lap_number',
         'stint', 'track_temp_c', 'air_temp_c', 'is_raining',
-        'avg_speed', 'avg_throttle_pct', 'heavy_braking_pct'
+        'avg_speed', 'avg_throttle_pct', 'heavy_braking_pct',
+        'laps_remaining', 'gap_to_car_ahead_seconds'
     ]
 
     X = df[feature_cols].fillna(0)
@@ -74,11 +80,6 @@ def prepare_features(df: pd.DataFrame):
     return X, y, le, feature_cols
 
 def train_test_split_by_year(df, X, y):
-    """
-    Split by year — not random split.
-    Train on 2023-2024, test on 2025.
-    Prevents data leakage from same-race laps appearing in both sets.
-    """
     train_mask = df['year'].isin([2023, 2024])
     test_mask = df['year'] == 2025
 
@@ -132,9 +133,10 @@ def tune_with_optuna(X_train, y_train, best_name) -> dict:
         if best_name == 'RandomForest':
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 300),
-                'max_depth': trial.suggest_int('max_depth', 3, 15),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
                 'min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
                 'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10),
+                'max_features': trial.suggest_float('max_features', 0.3, 0.8),
                 'class_weight': 'balanced',
                 'random_state': 42,
                 'n_jobs': -1
@@ -144,7 +146,7 @@ def tune_with_optuna(X_train, y_train, best_name) -> dict:
         elif best_name == 'XGBoost':
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 300),
-                'max_depth': trial.suggest_int('max_depth', 3, 10),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
                 'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
                 'subsample': trial.suggest_float('subsample', 0.6, 1.0),
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
@@ -299,7 +301,6 @@ def run():
     os.makedirs(PLOTS_DIR, exist_ok=True)
     conn = get_snowflake_connection()
 
-    # Load data
     df = load_features(conn)
     X, y, le, feature_cols = prepare_features(df)
 
@@ -307,26 +308,20 @@ def run():
     print(f"  No pit: {(y==0).sum()} ({(y==0).mean()*100:.1f}%)")
     print(f"  Pit:    {(y==1).sum()} ({(y==1).mean()*100:.1f}%)")
 
-    # Train/test split by year — no data leakage
     X_train, X_test, y_train, y_test = train_test_split_by_year(df, X, y)
 
-    # Compare 3 models
     print("\nComparing models on training data...")
     results = compare_models(X_train, y_train)
 
-    # Select best by F1
     best_name = max(results, key=lambda k: results[k]['f1_mean'])
     print(f"\nBest model before tuning: {best_name} (F1={results[best_name]['f1_mean']:.4f})")
 
-    # Tune with Optuna
     best_params = tune_with_optuna(X_train, y_train, best_name)
     tuned_model = build_tuned_model(best_name, best_params, y_train)
 
-    # Fit tuned model on full training data
     print("\nFitting tuned model on training data...")
     tuned_model.fit(X_train, y_train)
 
-    # Evaluate on test set (2025)
     y_pred = tuned_model.predict(X_test)
     print(f"\nTest set results (2025 season):")
     print(f"  F1:        {f1_score(y_test, y_pred):.4f}")
@@ -334,8 +329,6 @@ def run():
     print(f"  Recall:    {recall_score(y_test, y_pred):.4f}")
     print(classification_report(y_test, y_pred, target_names=['No Pit', 'Pit']))
 
-
-    # Threshold analysis
     print("\nThreshold analysis:")
     proba_test = tuned_model.predict_proba(X_test)[:, 1]
     for threshold in [0.1, 0.2, 0.3, 0.4, 0.5]:
@@ -344,24 +337,20 @@ def run():
         prec = precision_score(y_test, y_pred_t)
         rec = recall_score(y_test, y_pred_t)
         print(f"  threshold={threshold}: F1={f1:.3f} P={prec:.3f} R={rec:.3f}")
-    # Plots
+
     plot_confusion_matrix(y_test, y_pred)
     plot_feature_importance(tuned_model, feature_cols, best_name)
     plot_shap_values(tuned_model, X_test, feature_cols, best_name)
 
-    # Fit final model on ALL data
     print("\nFitting final model on full dataset...")
     tuned_model.fit(X, y)
 
-    # Save model
-    os.makedirs('ml', exist_ok=True)
     with open(MODEL_PATH, 'wb') as f:
         pickle.dump(tuned_model, f)
     with open(ENCODER_PATH, 'wb') as f:
         pickle.dump(le, f)
     print(f"Model saved to {MODEL_PATH}")
 
-    # Write predictions
     write_predictions(conn, df, X, tuned_model)
 
     conn.close()
@@ -369,3 +358,5 @@ def run():
 
 if __name__ == "__main__":
     run()
+
+   
