@@ -763,6 +763,39 @@ Ergast has retirement detail.
       by circuit and driver. Enables Looker to slice prediction errors by race/driver.
       Not added to MART_PIT_PREDICTIONS initially — will be added if needed for dashboards.
 
+## Kafka Setup
+
+**Decision:** KRaft mode (no Zookeeper)
+**Why:** Zookeeper is legacy as of Kafka 2.8+. KRaft lets the broker manage its own metadata. One fewer service to run and maintain.
+
+**Decision:** Single broker, single partition, replication factor 1
+**Why:** Portfolio project. Production would use 3+ brokers with replication for fault tolerance. Over-engineering this adds operational complexity with no interview benefit.
+
+**Decision:** Two listeners (PLAINTEXT on 9092, CONTROLLER on 9093)
+**Why:** Kafka needs to be reachable from two contexts — inside Docker (container-to-container) and from the Mac (producer/consumer scripts). Single listener can't serve both.
+
+**Decision:** Producer and consumer run on host, broker runs in Docker
+**Why:** Broker is a persistent service — Docker is the right home. Producer/consumer are scripts — keeping them on the host makes iteration and debugging faster during development. In production, all three would be containerized.
+
+**Topic:** pitwall.live.telemetry
+**Why:** Dot-separated naming convention signals hierarchy — project.environment.data_type. Standard Kafka naming pattern.
+
+
+## Kafka Producer
+
+**Decision:** Replay mode using OpenF1 historical session data
+**Why:** Enables on-demand demo without needing a live race weekend. Same producer code points at live OpenF1 endpoints during an actual race — only the session key changes.
+
+**Decision:** Sort all driver laps by date_start before publishing
+**Why:** Interleaves drivers chronologically, mimicking how a real race feed would arrive — not all laps for driver 1, then all for driver 4.
+
+**Decision:** 4-second sleep between messages
+**Why:** Matches OpenF1's live polling interval. Realistic cadence without overwhelming the consumer during development.
+
+**Decision:** Filter to only model-required fields before publishing
+**Why:** Keeps messages lean. No point streaming segments_sector data we never use in inference.
+
+
 ---
 
 
