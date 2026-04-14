@@ -795,10 +795,38 @@ Ergast has retirement detail.
 **Decision:** Filter to only model-required fields before publishing
 **Why:** Keeps messages lean. No point streaming segments_sector data we never use in inference.
 
+## Kafka Consumer
+
+**Decision:** Feature store pattern instead of per-message API calls
+**Why:** Enriching each Kafka message with 4 additional API calls (stints, position, weather, car data) would hit OpenF1's 30 requests/minute rate limit mid-race. A feature store pre-fetches all enrichment data once at startup and stores it in memory — instant lookup per message, no rate limit risk. This is the standard pattern used in production ML systems.
+
+**Decision:** In-memory feature store keyed by (driver_number, lap_number)
+**Why:** Snowflake would be too slow for per-message lookups during live inference. Python dictionary lookup is O(1) — no network round trip, no query latency. Race strategy decisions need to be made in seconds, not minutes.
+
+**Decision:** Feature store cached to disk after first build
+**Why:** Building the feature store requires ~80 API calls and takes 7 minutes due to rate limiting. Caching to pickle after first build means subsequent runs load in under 1 second. Cache is invalidated manually when switching sessions.
+
+**Decision:** Real gap data from OpenF1 intervals endpoint
+**Why:** gap_to_car_ahead_seconds is the strongest feature in the pit stop model. Hardcoding 0.0 would make every driver look like they're right behind the car ahead — inflating pit probabilities falsely. OpenF1 intervals endpoint provides real-time gap data timestamped to match lap start times.
+
+**Decision:** Lap 1 and 2 excluded from inference (lap_number < 3)
+**Why:** Interval data is unreliable in the first two laps — the field is still bunched from the start, gaps haven't stabilized, and tyre temperatures haven't reached operating window. Model predictions on lap 1-2 produce false positives. By lap 3 the field has settled into race pace and gaps are meaningful.
+
+**Decision:** Retired drivers filtered out in producer (fewer than 20 laps)
+**Why:** Drivers who retire early have very low laps_remaining from lap 1, which the model interprets as late-race urgency and flags as PIT NOW. Filtering retired drivers at the producer level prevents misleading inference on drivers who never completed a full race.
+
+**Decision:** Both pit stop and lap time models run per message
+**Why:** Pit probability drives strategy decisions (when to pit). Predicted lap time provides context (how fast the car is currently running). Both written to MART_PIT_PREDICTIONS_LIVE for Tableau dashboard consumption. Running both models adds negligible latency per message.
+
+**Decision:** DataFrame passed to models instead of raw numpy array
+**Why:** RandomForestRegressor was trained with named feature columns. Passing a plain numpy array triggers sklearn warnings and risks silent feature misalignment. DataFrame preserves column names — model receives features in the exact order it was trained on.
+
+**Decision:** threshold=0.2 for live pit stop inference
+**Why:** Model precision is low (0.153) but recall at 0.2 threshold is 0.482. In live race strategy, missing a pit window costs track position — false alarms are cheap (strategist ignores it), missed windows are expensive (driver loses position). Higher recall justified by asymmetric cost of errors.
 
 ---
 
 
-*Last updated: March 2026*
+*Last updated: April 2026*
 *Author: Priyal Maniar*
-*Project: PitWall — F1 Race Intelligence Pipeline*
+*Project: PitWall — F1 Race Intelligence*
