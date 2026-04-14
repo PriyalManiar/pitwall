@@ -2,7 +2,6 @@
 
 > An end-to-end data engineering and machine learning portfolio project that ingests, transforms, models, and streams Formula 1 race data — from 1950 historical results to live 2026 race inference.
 
-**GitHub:** https://github.com/PriyalManiar/pitwall  
 **Dashboard:** *(Tableau Public link — coming soon)*
 
 ---
@@ -17,6 +16,8 @@ The project spans the full data engineering stack: batch ingestion, cloud wareho
 ---
 
 ## Architecture
+
+<img width="1020" height="459" alt="Data Pipeline Architecture" src="https://github.com/user-attachments/assets/0e0c1255-0b59-4b95-9aa0-68cb236423f8" />
 
 ---
 
