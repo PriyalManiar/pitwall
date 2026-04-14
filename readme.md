@@ -107,34 +107,38 @@ Clean and rename raw tables. Add surrogate keys via `dbt_utils.generate_surrogat
 
 ## Project Structure
 
+## Project Structure
+
+```
 pitwall/
 ├── ingestion/
-│   ├── config.py           ← race config, years, helpers
-│   ├── lap_times.py        ← FastF1 lap ingestion
-│   ├── weather.py          ← weather join logic
-│   ├── pit_stops.py        ← two-sided pit reconstruction
-│   ├── results.py          ← race results
-│   ├── telemetry.py        ← aggregated telemetry
-│   ├── f1db.py             ← 1950–2022 historical results
-│   └── load_telemetry_raw.py ← 27M row parquet loader
+│   ├── config.py
+│   ├── lap_times.py
+│   ├── weather.py
+│   ├── pit_stops.py
+│   ├── results.py
+│   ├── telemetry.py
+│   ├── f1db.py
+│   └── load_telemetry_raw.py
 ├── ml/
 │   ├── pit_stop_predictor.py
 │   ├── lap_time_predictor.py
-│   └── plots/              ← SHAP, confusion matrix, residuals
+│   └── plots/
 ├── streaming/
-│   ├── kafka_producer.py   ← OpenF1 → Kafka
-│   ├── kafka_consumer.py   ← Kafka → feature store → ML → Snowflake
-│   └── feature_store.py    ← pre-computed enrichment lookup
+│   ├── kafka_producer.py
+│   ├── kafka_consumer.py
+│   └── feature_store.py
 ├── dags/
-│   └── pitwall_dag.py      ← Airflow DAG (sequential)
+│   └── pitwall_dag.py
 ├── pitwall_dbt/
 │   └── models/
 │       ├── staging/
 │       ├── intermediate/
 │       └── marts/
+├── assets/
 ├── Dockerfile
-└── docker-compose.yaml     ← Airflow + Kafka
-
+└── docker-compose.yaml
+```
 ---
 
 ## Key Engineering Decisions
@@ -196,6 +200,7 @@ python streaming/kafka_producer.py
 docker compose up -d
 # UI at localhost:8080, admin/admin
 ```
+<img width="1424" height="768" alt="Airflow UI" src="https://github.com/user-attachments/assets/7db3eb01-6b43-4652-aa44-9d410ad55893" />
 
 ---
 
@@ -212,4 +217,10 @@ docker compose up -d
 | Lap time model R² | 0.927 |
 | Live predictions (Monaco 2025 replay) | 1,425 laps, 20 drivers |
 
+## Dashboard
+
+
+*Live pit probability, predicted lap time, tire degradation, and historical champion analysis — built in Tableau Public.*
+
+**[View live dashboard →](YOUR_TABLEAU_PUBLIC_LINK)**
 ---
